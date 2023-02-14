@@ -1,0 +1,759 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"/><title>GPT3.0 Prompt Design</title><style>
+/* cspell:disable-file */
+/* webkit printing magic: print all background colors */
+html {
+	-webkit-print-color-adjust: exact;
+}
+* {
+	box-sizing: border-box;
+	-webkit-print-color-adjust: exact;
+}
+
+html,
+body {
+	margin: 0;
+	padding: 0;
+}
+@media only screen {
+	body {
+		margin: 2em auto;
+		max-width: 900px;
+		color: rgb(55, 53, 47);
+	}
+}
+
+body {
+	line-height: 1.5;
+	white-space: pre-wrap;
+}
+
+a,
+a.visited {
+	color: inherit;
+	text-decoration: underline;
+}
+
+.pdf-relative-link-path {
+	font-size: 80%;
+	color: #444;
+}
+
+h1,
+h2,
+h3 {
+	letter-spacing: -0.01em;
+	line-height: 1.2;
+	font-weight: 600;
+	margin-bottom: 0;
+}
+
+.page-title {
+	font-size: 2.5rem;
+	font-weight: 700;
+	margin-top: 0;
+	margin-bottom: 0.75em;
+}
+
+h1 {
+	font-size: 1.875rem;
+	margin-top: 1.875rem;
+}
+
+h2 {
+	font-size: 1.5rem;
+	margin-top: 1.5rem;
+}
+
+h3 {
+	font-size: 1.25rem;
+	margin-top: 1.25rem;
+}
+
+.source {
+	border: 1px solid #ddd;
+	border-radius: 3px;
+	padding: 1.5em;
+	word-break: break-all;
+}
+
+.callout {
+	border-radius: 3px;
+	padding: 1rem;
+}
+
+figure {
+	margin: 1.25em 0;
+	page-break-inside: avoid;
+}
+
+figcaption {
+	opacity: 0.5;
+	font-size: 85%;
+	margin-top: 0.5em;
+}
+
+mark {
+	background-color: transparent;
+}
+
+.indented {
+	padding-left: 1.5em;
+}
+
+hr {
+	background: transparent;
+	display: block;
+	width: 100%;
+	height: 1px;
+	visibility: visible;
+	border: none;
+	border-bottom: 1px solid rgba(55, 53, 47, 0.09);
+}
+
+img {
+	max-width: 100%;
+}
+
+@media only print {
+	img {
+		max-height: 100vh;
+		object-fit: contain;
+	}
+}
+
+@page {
+	margin: 1in;
+}
+
+.collection-content {
+	font-size: 0.875rem;
+}
+
+.column-list {
+	display: flex;
+	justify-content: space-between;
+}
+
+.column {
+	padding: 0 1em;
+}
+
+.column:first-child {
+	padding-left: 0;
+}
+
+.column:last-child {
+	padding-right: 0;
+}
+
+.table_of_contents-item {
+	display: block;
+	font-size: 0.875rem;
+	line-height: 1.3;
+	padding: 0.125rem;
+}
+
+.table_of_contents-indent-1 {
+	margin-left: 1.5rem;
+}
+
+.table_of_contents-indent-2 {
+	margin-left: 3rem;
+}
+
+.table_of_contents-indent-3 {
+	margin-left: 4.5rem;
+}
+
+.table_of_contents-link {
+	text-decoration: none;
+	opacity: 0.7;
+	border-bottom: 1px solid rgba(55, 53, 47, 0.18);
+}
+
+table,
+th,
+td {
+	border: 1px solid rgba(55, 53, 47, 0.09);
+	border-collapse: collapse;
+}
+
+table {
+	border-left: none;
+	border-right: none;
+}
+
+th,
+td {
+	font-weight: normal;
+	padding: 0.25em 0.5em;
+	line-height: 1.5;
+	min-height: 1.5em;
+	text-align: left;
+}
+
+th {
+	color: rgba(55, 53, 47, 0.6);
+}
+
+ol,
+ul {
+	margin: 0;
+	margin-block-start: 0.6em;
+	margin-block-end: 0.6em;
+}
+
+li > ol:first-child,
+li > ul:first-child {
+	margin-block-start: 0.6em;
+}
+
+ul > li {
+	list-style: disc;
+}
+
+ul.to-do-list {
+	text-indent: -1.7em;
+}
+
+ul.to-do-list > li {
+	list-style: none;
+}
+
+.to-do-children-checked {
+	text-decoration: line-through;
+	opacity: 0.375;
+}
+
+ul.toggle > li {
+	list-style: none;
+}
+
+ul {
+	padding-inline-start: 1.7em;
+}
+
+ul > li {
+	padding-left: 0.1em;
+}
+
+ol {
+	padding-inline-start: 1.6em;
+}
+
+ol > li {
+	padding-left: 0.2em;
+}
+
+.mono ol {
+	padding-inline-start: 2em;
+}
+
+.mono ol > li {
+	text-indent: -0.4em;
+}
+
+.toggle {
+	padding-inline-start: 0em;
+	list-style-type: none;
+}
+
+/* Indent toggle children */
+.toggle > li > details {
+	padding-left: 1.7em;
+}
+
+.toggle > li > details > summary {
+	margin-left: -1.1em;
+}
+
+.selected-value {
+	display: inline-block;
+	padding: 0 0.5em;
+	background: rgba(206, 205, 202, 0.5);
+	border-radius: 3px;
+	margin-right: 0.5em;
+	margin-top: 0.3em;
+	margin-bottom: 0.3em;
+	white-space: nowrap;
+}
+
+.collection-title {
+	display: inline-block;
+	margin-right: 1em;
+}
+
+.simple-table {
+	margin-top: 1em;
+	font-size: 0.875rem;
+	empty-cells: show;
+}
+.simple-table td {
+	height: 29px;
+	min-width: 120px;
+}
+
+.simple-table th {
+	height: 29px;
+	min-width: 120px;
+}
+
+.simple-table-header-color {
+	background: rgb(247, 246, 243);
+	color: black;
+}
+.simple-table-header {
+	font-weight: 500;
+}
+
+time {
+	opacity: 0.5;
+}
+
+.icon {
+	display: inline-block;
+	max-width: 1.2em;
+	max-height: 1.2em;
+	text-decoration: none;
+	vertical-align: text-bottom;
+	margin-right: 0.5em;
+}
+
+img.icon {
+	border-radius: 3px;
+}
+
+.user-icon {
+	width: 1.5em;
+	height: 1.5em;
+	border-radius: 100%;
+	margin-right: 0.5rem;
+}
+
+.user-icon-inner {
+	font-size: 0.8em;
+}
+
+.text-icon {
+	border: 1px solid #000;
+	text-align: center;
+}
+
+.page-cover-image {
+	display: block;
+	object-fit: cover;
+	width: 100%;
+	max-height: 30vh;
+}
+
+.page-header-icon {
+	font-size: 3rem;
+	margin-bottom: 1rem;
+}
+
+.page-header-icon-with-cover {
+	margin-top: -0.72em;
+	margin-left: 0.07em;
+}
+
+.page-header-icon img {
+	border-radius: 3px;
+}
+
+.link-to-page {
+	margin: 1em 0;
+	padding: 0;
+	border: none;
+	font-weight: 500;
+}
+
+p > .user {
+	opacity: 0.5;
+}
+
+td > .user,
+td > time {
+	white-space: nowrap;
+}
+
+input[type="checkbox"] {
+	transform: scale(1.5);
+	margin-right: 0.6em;
+	vertical-align: middle;
+}
+
+p {
+	margin-top: 0.5em;
+	margin-bottom: 0.5em;
+}
+
+.image {
+	border: none;
+	margin: 1.5em 0;
+	padding: 0;
+	border-radius: 0;
+	text-align: center;
+}
+
+.code,
+code {
+	background: rgba(135, 131, 120, 0.15);
+	border-radius: 3px;
+	padding: 0.2em 0.4em;
+	border-radius: 3px;
+	font-size: 85%;
+	tab-size: 2;
+}
+
+code {
+	color: #eb5757;
+}
+
+.code {
+	padding: 1.5em 1em;
+}
+
+.code-wrap {
+	white-space: pre-wrap;
+	word-break: break-all;
+}
+
+.code > code {
+	background: none;
+	padding: 0;
+	font-size: 100%;
+	color: inherit;
+}
+
+blockquote {
+	font-size: 1.25em;
+	margin: 1em 0;
+	padding-left: 1em;
+	border-left: 3px solid rgb(55, 53, 47);
+}
+
+.bookmark {
+	text-decoration: none;
+	max-height: 8em;
+	padding: 0;
+	display: flex;
+	width: 100%;
+	align-items: stretch;
+}
+
+.bookmark-title {
+	font-size: 0.85em;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	height: 1.75em;
+	white-space: nowrap;
+}
+
+.bookmark-text {
+	display: flex;
+	flex-direction: column;
+}
+
+.bookmark-info {
+	flex: 4 1 180px;
+	padding: 12px 14px 14px;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+}
+
+.bookmark-image {
+	width: 33%;
+	flex: 1 1 180px;
+	display: block;
+	position: relative;
+	object-fit: cover;
+	border-radius: 1px;
+}
+
+.bookmark-description {
+	color: rgba(55, 53, 47, 0.6);
+	font-size: 0.75em;
+	overflow: hidden;
+	max-height: 4.5em;
+	word-break: break-word;
+}
+
+.bookmark-href {
+	font-size: 0.75em;
+	margin-top: 0.25em;
+}
+
+.sans { font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol"; }
+.code { font-family: "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace; }
+.serif { font-family: Lyon-Text, Georgia, ui-serif, serif; }
+.mono { font-family: iawriter-mono, Nitti, Menlo, Courier, monospace; }
+.pdf .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK JP'; }
+.pdf:lang(zh-CN) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK SC'; }
+.pdf:lang(zh-TW) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK TC'; }
+.pdf:lang(ko-KR) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK KR'; }
+.pdf .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK JP'; }
+.pdf:lang(zh-CN) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK SC'; }
+.pdf:lang(zh-TW) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK TC'; }
+.pdf:lang(ko-KR) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK KR'; }
+.pdf .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK JP'; }
+.pdf:lang(zh-CN) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK SC'; }
+.pdf:lang(zh-TW) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK TC'; }
+.pdf:lang(ko-KR) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK KR'; }
+.pdf .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK JP'; }
+.pdf:lang(zh-CN) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK SC'; }
+.pdf:lang(zh-TW) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK TC'; }
+.pdf:lang(ko-KR) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK KR'; }
+.highlight-default {
+	color: rgba(55, 53, 47, 1);
+}
+.highlight-gray {
+	color: rgba(120, 119, 116, 1);
+	fill: rgba(120, 119, 116, 1);
+}
+.highlight-brown {
+	color: rgba(159, 107, 83, 1);
+	fill: rgba(159, 107, 83, 1);
+}
+.highlight-orange {
+	color: rgba(217, 115, 13, 1);
+	fill: rgba(217, 115, 13, 1);
+}
+.highlight-yellow {
+	color: rgba(203, 145, 47, 1);
+	fill: rgba(203, 145, 47, 1);
+}
+.highlight-teal {
+	color: rgba(68, 131, 97, 1);
+	fill: rgba(68, 131, 97, 1);
+}
+.highlight-blue {
+	color: rgba(51, 126, 169, 1);
+	fill: rgba(51, 126, 169, 1);
+}
+.highlight-purple {
+	color: rgba(144, 101, 176, 1);
+	fill: rgba(144, 101, 176, 1);
+}
+.highlight-pink {
+	color: rgba(193, 76, 138, 1);
+	fill: rgba(193, 76, 138, 1);
+}
+.highlight-red {
+	color: rgba(212, 76, 71, 1);
+	fill: rgba(212, 76, 71, 1);
+}
+.highlight-gray_background {
+	background: rgba(241, 241, 239, 1);
+}
+.highlight-brown_background {
+	background: rgba(244, 238, 238, 1);
+}
+.highlight-orange_background {
+	background: rgba(251, 236, 221, 1);
+}
+.highlight-yellow_background {
+	background: rgba(251, 243, 219, 1);
+}
+.highlight-teal_background {
+	background: rgba(237, 243, 236, 1);
+}
+.highlight-blue_background {
+	background: rgba(231, 243, 248, 1);
+}
+.highlight-purple_background {
+	background: rgba(244, 240, 247, 0.8);
+}
+.highlight-pink_background {
+	background: rgba(249, 238, 243, 0.8);
+}
+.highlight-red_background {
+	background: rgba(253, 235, 236, 1);
+}
+.block-color-default {
+	color: inherit;
+	fill: inherit;
+}
+.block-color-gray {
+	color: rgba(120, 119, 116, 1);
+	fill: rgba(120, 119, 116, 1);
+}
+.block-color-brown {
+	color: rgba(159, 107, 83, 1);
+	fill: rgba(159, 107, 83, 1);
+}
+.block-color-orange {
+	color: rgba(217, 115, 13, 1);
+	fill: rgba(217, 115, 13, 1);
+}
+.block-color-yellow {
+	color: rgba(203, 145, 47, 1);
+	fill: rgba(203, 145, 47, 1);
+}
+.block-color-teal {
+	color: rgba(68, 131, 97, 1);
+	fill: rgba(68, 131, 97, 1);
+}
+.block-color-blue {
+	color: rgba(51, 126, 169, 1);
+	fill: rgba(51, 126, 169, 1);
+}
+.block-color-purple {
+	color: rgba(144, 101, 176, 1);
+	fill: rgba(144, 101, 176, 1);
+}
+.block-color-pink {
+	color: rgba(193, 76, 138, 1);
+	fill: rgba(193, 76, 138, 1);
+}
+.block-color-red {
+	color: rgba(212, 76, 71, 1);
+	fill: rgba(212, 76, 71, 1);
+}
+.block-color-gray_background {
+	background: rgba(241, 241, 239, 1);
+}
+.block-color-brown_background {
+	background: rgba(244, 238, 238, 1);
+}
+.block-color-orange_background {
+	background: rgba(251, 236, 221, 1);
+}
+.block-color-yellow_background {
+	background: rgba(251, 243, 219, 1);
+}
+.block-color-teal_background {
+	background: rgba(237, 243, 236, 1);
+}
+.block-color-blue_background {
+	background: rgba(231, 243, 248, 1);
+}
+.block-color-purple_background {
+	background: rgba(244, 240, 247, 0.8);
+}
+.block-color-pink_background {
+	background: rgba(249, 238, 243, 0.8);
+}
+.block-color-red_background {
+	background: rgba(253, 235, 236, 1);
+}
+.select-value-color-pink { background-color: rgba(245, 224, 233, 1); }
+.select-value-color-purple { background-color: rgba(232, 222, 238, 1); }
+.select-value-color-green { background-color: rgba(219, 237, 219, 1); }
+.select-value-color-gray { background-color: rgba(227, 226, 224, 1); }
+.select-value-color-opaquegray { background-color: rgba(255, 255, 255, 0.0375); }
+.select-value-color-orange { background-color: rgba(250, 222, 201, 1); }
+.select-value-color-brown { background-color: rgba(238, 224, 218, 1); }
+.select-value-color-red { background-color: rgba(255, 226, 221, 1); }
+.select-value-color-yellow { background-color: rgba(253, 236, 200, 1); }
+.select-value-color-blue { background-color: rgba(211, 229, 239, 1); }
+
+.checkbox {
+	display: inline-flex;
+	vertical-align: text-bottom;
+	width: 16;
+	height: 16;
+	background-size: 16px;
+	margin-left: 2px;
+	margin-right: 5px;
+}
+
+.checkbox-on {
+	background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Crect%20width%3D%2216%22%20height%3D%2216%22%20fill%3D%22%2358A9D7%22%2F%3E%0A%3Cpath%20d%3D%22M6.71429%2012.2852L14%204.9995L12.7143%203.71436L6.71429%209.71378L3.28571%206.2831L2%207.57092L6.71429%2012.2852Z%22%20fill%3D%22white%22%2F%3E%0A%3C%2Fsvg%3E");
+}
+
+.checkbox-off {
+	background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Crect%20x%3D%220.75%22%20y%3D%220.75%22%20width%3D%2214.5%22%20height%3D%2214.5%22%20fill%3D%22white%22%20stroke%3D%22%2336352F%22%20stroke-width%3D%221.5%22%2F%3E%0A%3C%2Fsvg%3E");
+}
+	
+</style></head><body><article id="71876ba9-2074-4bb7-82e1-bc7fb928e4cd" class="page sans"><header><img class="page-cover-image" src="https://images.unsplash.com/photo-1546776310-eef45dd6d63c?ixlib=rb-4.0.3&amp;q=80&amp;fm=jpg&amp;crop=entropy&amp;cs=tinysrgb" style="object-position:center 50%"/><div class="page-header-icon page-header-icon-with-cover"><span class="icon">🤖</span></div><h1 class="page-title">GPT3.0 Prompt Design</h1><table class="properties"><tbody><tr class="property-row property-row-created_time"><th><span class="icon property-icon"><svg viewBox="0 0 16 16" style="width:14px;height:14px;display:block;fill:rgba(55, 53, 47, 0.45);flex-shrink:0;-webkit-backface-visibility:hidden" class="typesCreatedAt"><path d="M8 15.126C11.8623 15.126 15.0615 11.9336 15.0615 8.06445C15.0615 4.20215 11.8623 1.00293 7.99316 1.00293C4.13086 1.00293 0.938477 4.20215 0.938477 8.06445C0.938477 11.9336 4.1377 15.126 8 15.126ZM8 13.7383C4.85547 13.7383 2.33301 11.209 2.33301 8.06445C2.33301 4.91992 4.84863 2.39746 7.99316 2.39746C11.1377 2.39746 13.6738 4.91992 13.6738 8.06445C13.6738 11.209 11.1445 13.7383 8 13.7383ZM4.54102 8.91211H7.99316C8.30078 8.91211 8.54004 8.67285 8.54004 8.37207V3.8877C8.54004 3.58691 8.30078 3.34766 7.99316 3.34766C7.69238 3.34766 7.45312 3.58691 7.45312 3.8877V7.83203H4.54102C4.2334 7.83203 4.00098 8.06445 4.00098 8.37207C4.00098 8.67285 4.2334 8.91211 4.54102 8.91211Z"></path></svg></span>Created</th><td><time>@February 9, 2023 10:14 AM</time></td></tr><tr class="property-row property-row-multi_select"><th><span class="icon property-icon"><svg viewBox="0 0 16 16" style="width:14px;height:14px;display:block;fill:rgba(55, 53, 47, 0.45);flex-shrink:0;-webkit-backface-visibility:hidden" class="typesMultipleSelect"><path d="M1.91602 4.83789C2.44238 4.83789 2.87305 4.40723 2.87305 3.87402C2.87305 3.34766 2.44238 2.91699 1.91602 2.91699C1.38281 2.91699 0.952148 3.34766 0.952148 3.87402C0.952148 4.40723 1.38281 4.83789 1.91602 4.83789ZM5.1084 4.52344H14.3984C14.7607 4.52344 15.0479 4.23633 15.0479 3.87402C15.0479 3.51172 14.7607 3.22461 14.3984 3.22461H5.1084C4.74609 3.22461 4.45898 3.51172 4.45898 3.87402C4.45898 4.23633 4.74609 4.52344 5.1084 4.52344ZM1.91602 9.03516C2.44238 9.03516 2.87305 8.60449 2.87305 8.07129C2.87305 7.54492 2.44238 7.11426 1.91602 7.11426C1.38281 7.11426 0.952148 7.54492 0.952148 8.07129C0.952148 8.60449 1.38281 9.03516 1.91602 9.03516ZM5.1084 8.7207H14.3984C14.7607 8.7207 15.0479 8.43359 15.0479 8.07129C15.0479 7.70898 14.7607 7.42188 14.3984 7.42188H5.1084C4.74609 7.42188 4.45898 7.70898 4.45898 8.07129C4.45898 8.43359 4.74609 8.7207 5.1084 8.7207ZM1.91602 13.2324C2.44238 13.2324 2.87305 12.8018 2.87305 12.2686C2.87305 11.7422 2.44238 11.3115 1.91602 11.3115C1.38281 11.3115 0.952148 11.7422 0.952148 12.2686C0.952148 12.8018 1.38281 13.2324 1.91602 13.2324ZM5.1084 12.918H14.3984C14.7607 12.918 15.0479 12.6309 15.0479 12.2686C15.0479 11.9062 14.7607 11.6191 14.3984 11.6191H5.1084C4.74609 11.6191 4.45898 11.9062 4.45898 12.2686C4.45898 12.6309 4.74609 12.918 5.1084 12.918Z"></path></svg></span>Tags</th><td></td></tr></tbody></table></header><div class="page-body"><nav id="570a4b07-aa1e-4795-8145-813cf2e58c2d" class="block-color-gray table_of_contents"><div class="table_of_contents-item table_of_contents-indent-0"><a class="table_of_contents-link" href="#c19512e0-c8bd-4d54-b1a4-b0a155966e53">General </a></div><div class="table_of_contents-item table_of_contents-indent-1"><a class="table_of_contents-link" href="#53d9a6f9-cab4-411d-910e-e577628beaf3">General Q&amp;A</a></div><div class="table_of_contents-item table_of_contents-indent-0"><a class="table_of_contents-link" href="#0a7534a1-5844-4b30-b7c9-be9e3fd4e90d">Business Users</a></div><div class="table_of_contents-item table_of_contents-indent-1"><a class="table_of_contents-link" href="#599dc0a0-55bd-450d-b133-cfbdb8e67990">Turn meeting notes into a summary</a></div><div class="table_of_contents-item table_of_contents-indent-1"><a class="table_of_contents-link" href="#7d6f12d3-21c2-408d-bd8c-d5887ccd4ecd">Summarize Key Points</a></div><div class="table_of_contents-item table_of_contents-indent-1"><a class="table_of_contents-link" href="#770f5db3-4e55-4457-9bc3-f332f8210948">Extract Key Statistics</a></div><div class="table_of_contents-item table_of_contents-indent-0"><a class="table_of_contents-link" href="#5e556c1a-76ce-4e45-9da4-a02a0fea2b2a">Power Users</a></div><div class="table_of_contents-item table_of_contents-indent-1"><a class="table_of_contents-link" href="#9a37c65f-0137-4171-bc37-8fdc92575bad">Automatically categorize reviews/feedbacks</a></div><div class="table_of_contents-item table_of_contents-indent-1"><a class="table_of_contents-link" href="#9cf59cc1-95ca-4909-bf05-792f786b48a4">Extract Structured data from Unstructured Data</a></div><div class="table_of_contents-item table_of_contents-indent-1"><a class="table_of_contents-link" href="#64bf1790-8a18-4940-8fe3-4d89e638f184">Explaining what the code does</a></div><div class="table_of_contents-item table_of_contents-indent-0"><a class="table_of_contents-link" href="#278d6dec-60f5-43d2-b899-b00a11802043">Technical Users</a></div><div class="table_of_contents-item table_of_contents-indent-1"><a class="table_of_contents-link" href="#9e507fe9-011a-48fa-978a-0be21c6a7bea">Entity Relation Extraction (NLP)</a></div><div class="table_of_contents-item table_of_contents-indent-0"><a class="table_of_contents-link" href="#101763c8-18f3-4cff-800a-54cee4293d44"></a></div></nav><p id="8d920935-ee69-4f6a-ba97-950cf8bb01b5" class="">
+</p><p id="81fe89fa-bc70-4f78-a03d-103bdaff4a6f" class="">
+</p><h1 id="c19512e0-c8bd-4d54-b1a4-b0a155966e53" class="">General </h1><h2 id="53d9a6f9-cab4-411d-910e-e577628beaf3" class="">General Q&amp;A</h2><pre id="1ecb120e-4f16-474e-864c-c63417e1c4f4" class="code"><code>I am a highly intelligent question answering bot. If you ask me a question that is rooted in truth, I will give you the answer. If you ask me a question that is nonsense, trickery, or has no clear answer, I will respond with &quot;Unknown&quot;.
+
+Q: Who was the prime minister of Singapore in 2000?
+A: Goh Chok Tong was the prime minister of Singapore in 2000.
+
+Q: What is human life expectancy in Singapore?
+A: Human life expectancy in the United States is 83.74 years.
+
+Q: What is the square root of banana?
+A: Unknown
+
+Q: &lt;Insert your question here&gt;</code></pre><p id="f0db2966-2a76-418f-ba7e-c999a5fbdbf8" class="">
+</p><pre id="1da424b5-9519-434f-92e5-97ff7ffbdac4" class="code"><code>Correct this to Standard English:
+
+&lt;Insert our paragraph(s) here&gt;</code></pre><h1 id="0a7534a1-5844-4b30-b7c9-be9e3fd4e90d" class="">Business Users</h1><h2 id="599dc0a0-55bd-450d-b133-cfbdb8e67990" class="">Turn meeting notes into a summary</h2><pre id="f6683f9a-1bb0-4ae5-937b-268cf2237282" class="code"><code>Convert my short hand into a first-hand account of the meeting:
+
+Tom: Profits up 50%
+Jane: New servers are online
+Kjel: Need more time to fix software
+Jane: Happy to help
+Parkman: Beta testing almost done</code></pre><h2 id="7d6f12d3-21c2-408d-bd8c-d5887ccd4ecd" class="">Summarize Key Points</h2><pre id="32175982-34f4-4ac0-a861-c598e160cfc8" class="code"><code>Summarize this within 150 words:
+
+SINGAPORE: There was a small jump in the number of commuters satisfied with public transport in Singapore in 2022, compared to the year before, a Public Transport Council (PTC) survey has found. The council said on Monday (Feb 13) that 92.7 per cent of people surveyed were satisfied with public transport in 2022, a slight improvement compared to 2021, which experienced a six-year low of 92 per cent.
+
+The Public Transport Customer Satisfaction Survey, conducted annually since 2006, seeks to understand commuters’ expectations and needs, as well as to identify areas for improvement. The 2022 survey was conducted online, with 5,029 commuters aged 15 and above, between Sep 17 and Oct 31. Respondents were asked to provide a rating of between 1 to 10, with 1 representing very dissatisfied or unimportant. Those who gave a score of 6 were deemed to be satisfied.The mean satisfaction score for 2022 remained at 7.8 for the fourth consecutive year, with ratings given by commuters for individual service attributes.
+
+The service attributes are safety and security, waiting time, reliability, service information, bus interchange or bus stop or MRT station accessibility, comfort, travel time and customer service.
+For MRT services, overall satisfaction rose from 93.6 per cent to 94.2 per cent, with significant increase in ratings for safety and security, waiting time, and customer service. The mean satisfaction score for MRT services increased from 7.9 to 8.0.
+
+For bus services, overall satisfaction increased from 90.8 per cent to 91.7 per cent. Ratings for reliability saw a dip from 87.9 per cent to 85.5 per cent, while waiting time, comfort, customer service, and safety and security rose.
+Ratings for service information, accessibility, and travel time also increased slightly. The mean satisfaction score for bus services remained at 7.7.</code></pre><h2 id="770f5db3-4e55-4457-9bc3-f332f8210948" class="">Extract Key Statistics</h2><pre id="214c857b-210a-4508-a5a9-3c57a83004b6" class="code"><code>List the key statistics in this:
+
+&lt;insert your document&gt;
+
+SINGAPORE: Median household income in Singapore grew 0.2 per cent in 2022 after accounting for inflation, in figures released on Thursday (Feb 9) by the Singapore Department of Statistics. Among resident-employed households, median monthly household income from work grew by 6.1 per cent in nominal terms, from S$9,520 in 2021 to S$10,099 last year. But after accounting for inflation, the gain translated to 0.2 per cent. For each member of the household, the median income from work per person rose 8.6 per cent from S$3,027 to S$3,287. In real terms, after accounting for inflation, this is a 2.6 per cent increase. The rise in median income per person is larger because household size fell from 3.32 to 3.27. All income groups saw a rise in real median income per household member, but there was a dip of 1.3 per cent for the top 10 per cent of earners. Meanwhile, households in the first nine deciles saw real income growth of 1.1 to 10.1 per cent, with lower income groups experiencing larger increases.Income inequality fell with the Gini coefficient dropping to 0.437, from 0.444 in 2021. After adjusting for government transfers and taxes, the Gini coefficient in 2022 is 0.378, the second lowest on record. 
+
+
+</code></pre><figure id="11ba3eef-66ec-4aab-b61b-92d0f570aa4a" class="image"><a href="GPT3%200%20Prompt%20Design%2071876ba920744bb782e1bc7fb928e4cd/Untitled.png"><img style="width:1148px" src="GPT3%200%20Prompt%20Design%2071876ba920744bb782e1bc7fb928e4cd/Untitled.png"/></a></figure><p id="2062d4d7-aebd-49cd-8e4c-3b71a55bb517" class="">
+</p><h1 id="5e556c1a-76ce-4e45-9da4-a02a0fea2b2a" class="">Power Users</h1><h2 id="9a37c65f-0137-4171-bc37-8fdc92575bad" class="">Automatically categorize reviews/feedbacks</h2><pre id="8cdf74e6-78d7-417e-b582-e70634f8517d" class="code"><code>Classify the reviews for business into 3 non-mutually exclusive categories: &quot;food&quot;, &quot;service&quot;, &quot;environment&quot;, with confidence level:
+
+Examples:
+i. &quot;The food is terrible&quot;: food (0.8)
+ii. &quot;The food is great, but the service is bad&quot;: food (0.8); service (0.7)
+iii. &quot;The toilet is gross! The restaurant is pretty rundown.&quot;: environment (0.9)
+
+Reviews:
+1. &quot;The service is non-existance😠&quot;
+2. &quot;Love the place, it&#x27;s great place to hang out!!!&quot;
+3. &quot;The service is aweosome, but the food is nah..&quot;
+
+Category and Confidence level:
+1. &quot;Service (0.8)&quot;
+2. &quot;Environment (0.9); Service (0.8)&quot;
+3. &quot;Service (0.8); Food (0.7)&quot;</code></pre><figure id="d9110e1a-1c9a-4f4b-a74e-12fdc403c42f" class="image"><a href="GPT3%200%20Prompt%20Design%2071876ba920744bb782e1bc7fb928e4cd/Untitled%201.png"><img style="width:897px" src="GPT3%200%20Prompt%20Design%2071876ba920744bb782e1bc7fb928e4cd/Untitled%201.png"/></a></figure><p id="b9ca585a-bd1b-4dae-9f32-b222e7f20cbe" class="">
+</p><h2 id="9cf59cc1-95ca-4909-bf05-792f786b48a4" class="">Extract Structured data from Unstructured Data</h2><pre id="bddc8393-c86d-487d-aa30-3ddadfa80a82" class="code"><code>A table summarizing the fruits from Goocrux:
+
+There are many fruits that were found on the recently discovered planet Goocrux. 
+There are neoskizzles that grow there, which are purple and taste like candy. 
+There are also loheckles, which are a grayish blue fruit and are very tart, a little bit like a lemon. 
+Pounits are a bright green color and are more savory than sweet. 
+There are also plenty of loopnovas which are a neon pink flavor and taste like cotton candy. 
+Finally, there are fruits called glowls, which have a very sour and bitter taste which is acidic and caustic, and a pale orange tinge to them.
+
+| Fruit | Color | Flavor |</code></pre><p id="c3cd7aac-d866-4bce-9a76-67b6691cf171" class="">
+</p><h2 id="64bf1790-8a18-4940-8fe3-4d89e638f184" class="">Explaining what the code does</h2><pre id="ec1db4ce-6e34-4afd-978c-f2199aae5edb" class="code"><code># Python 3 
+def remove_common_prefix(x, prefix, ws_prefix): 
+    x[&quot;completion&quot;] = x[&quot;completion&quot;].str[len(prefix) :] 
+    if ws_prefix: 
+        # keep the single whitespace as prefix 
+        x[&quot;completion&quot;] = &quot; &quot; + x[&quot;completion&quot;] 
+return x 
+
+# Explanation of what the code does
+#</code></pre><p id="29be62e6-e52a-4ee3-883b-c8a9eea2f794" class="">
+</p><p id="5b50619f-6e53-4bf8-9a24-bc136504a514" class="">
+</p><p id="2bec4f43-bdae-4ce4-9f13-8c4907807650" class="">
+</p><p id="7f6d5bc1-530e-4138-a125-242ad242ab10" class="">
+</p><p id="5f5f1956-5210-4a82-b74b-02186d10c418" class="">
+</p><h1 id="278d6dec-60f5-43d2-b899-b00a11802043" class="">Technical Users</h1><h2 id="9e507fe9-011a-48fa-978a-0be21c6a7bea" class="">Entity Relation Extraction (NLP)</h2><p id="030cb306-64a6-4282-93e1-b058a9015e4e" class="">Dataset: kbp37-master <a href="https://github.com/davidsbatista/Annotated-Semantic-Relationships-Datasets/blob/master/datasets/kbp37-master.zip">https://github.com/davidsbatista/Annotated-Semantic-Relationships-Datasets/blob/master/datasets/kbp37-master.zip</a></p><pre id="01603e68-9363-42e7-a147-c273153e877a" class="code"><code>Extract the entity relation from the given sentence in the format [&quot;noun&quot;, &quot;verb&quot;, &quot;subject&quot;].
+
+Example of the given setence:
+i. &quot; Sarkozy was to visit a job-centre in Marylebone central London&quot;: [Sarkozy; visit; job-centre]
+ii. &quot;It was a religious program featuring prolific American actor, Raymond Massey&quot;: [&quot;religious program&quot;, &quot;feature&quot;, &quot;Raymond Massey&quot;]
+
+Given Sentence:
+&quot; Universitate is a metro station located in University Square&quot; :
+[&quot;Universitate&quot;, &quot;locate&quot;, &quot;University Square&quot;]</code></pre><figure id="f4cec711-5fd3-4fd4-be73-fd4f132f6897" class="image"><a href="GPT3%200%20Prompt%20Design%2071876ba920744bb782e1bc7fb928e4cd/Untitled%202.png"><img style="width:1277px" src="GPT3%200%20Prompt%20Design%2071876ba920744bb782e1bc7fb928e4cd/Untitled%202.png"/></a></figure><p id="54c963e5-fd4d-4d54-821c-be8ea572dedd" class="">
+</p><h1 id="101763c8-18f3-4cff-800a-54cee4293d44" class=""></h1><p id="df06d321-dc4e-42a8-96b2-e45a5b98d735" class="">
+</p></div></article></body></html>
